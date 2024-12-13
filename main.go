@@ -15,7 +15,7 @@ const (
 )
 
 type Parcel struct {
-	Number    int
+	Number    int64
 	Client    int
 	Status    string
 	Address   string
@@ -67,7 +67,7 @@ func (s ParcelService) PrintClientParcels(client int) error {
 	return nil
 }
 
-func (s ParcelService) NextStatus(number int) error {
+func (s ParcelService) NextStatus(number int64) error {
 	parcel, err := s.store.Get(number)
 	if err != nil {
 		return err
@@ -88,18 +88,23 @@ func (s ParcelService) NextStatus(number int) error {
 	return s.store.SetStatus(number, nextStatus)
 }
 
-func (s ParcelService) ChangeAddress(number int, address string) error {
+func (s ParcelService) ChangeAddress(number int64, address string) error {
 	return s.store.SetAddress(number, address)
 }
 
-func (s ParcelService) Delete(number int) error {
+func (s ParcelService) Delete(number int64) error {
 	return s.store.Delete(number)
 }
 
 func main() {
-	// настройте подключение к БД
+	db, err := sql.Open("sqlite", "tracker.db")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
 
-	store := // создайте объект ParcelStore функцией NewParcelStore
+	store := NewParcelStore(db)
 	service := NewParcelService(store)
 
 	// регистрация посылки
